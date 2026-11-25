@@ -1,0 +1,66 @@
+# General Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# VS Code & IDEs
+.vscode/
+.vs/
+.idea/
+*.swp
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Temporary & Large Media Files
+*.tmp
+*.log
+*.mp4
+*.avi
+*.webm
+*.weights
+
+# Large ML model and data files
+*.h5
+*.pb
+*.dat
+*.npy
+*.exe
+*.pkg
+*.spec
+
+# Exclude large training datasets, videos, and raw images
+**/dataset/
+**/Sohas_weapon-Detection/
+**/Gun/
+**/MASK/
+**/Padded_imgs/
+**/Weapontest*
+**/Yolo/images/
+**/saved_videos/
+**/saved_images/
+**/Captured/
+**/videos/
+**/output_images/
+**/build/
+**/dist/
+
+# OS Generated
+.DS_Store
+Thumbs.db
+.aider*

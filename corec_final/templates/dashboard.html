@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corec — Crime Detection Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: #080c14;
+  --bg2: #0d1321;
+  --card: rgba(17,25,40,0.85);
+  --border: rgba(255,255,255,0.07);
+  --blue: #3b82f6;
+  --cyan: #06b6d4;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --txt: #e2e8f0;
+  --muted: #64748b;
+  --mono: 'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--bg);color:var(--txt);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+/* ── Header ── */
+header{
+  background:rgba(8,12,20,0.95);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:.85rem 2rem;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:.75rem}
+.logo-icon{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1.1rem;color:#fff;
+  box-shadow:0 0 18px rgba(59,130,246,0.45);
+}
+.logo-text h1{font-size:1.15rem;font-weight:700;
+  background:linear-gradient(90deg,#fff,#93c5fd);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-text p{font-size:.7rem;color:var(--muted);margin-top:1px}
+.sys-status{display:flex;align-items:center;gap:.5rem;
+  background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);
+  color:var(--green);padding:.35rem .85rem;border-radius:9999px;
+  font-size:.8rem;font-weight:600;letter-spacing:.02em}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+     animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+
+/* ── Threat Banner ── */
+#threat-banner{
+  margin:.9rem 1.75rem 0;padding:.8rem 1.2rem;
+  border-radius:10px;display:flex;justify-content:space-between;align-items:center;
+  font-weight:600;font-size:.9rem;transition:all .3s ease;
+  background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);color:var(--green);
+}
+#threat-banner.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35);color:var(--amber)}
+#threat-banner.alert{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.5);color:var(--red);animation:blink 1s step-start infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.55}}
+
+/* ── Grid layout ── */
+main{
+  flex:1;padding:1.2rem 1.75rem;
+  display:grid;
+  grid-template-columns:1fr 340px;
+  grid-template-rows:auto auto;
+  gap:1.1rem;
+}
+
+/* ── Card base ── */
+.card{
+  background:var(--card);
+  backdrop-filter:blur(18px);
+  border:1px solid var(--border);
+  border-radius:14px;padding:1.1rem;
+  display:flex;flex-direction:column;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.card-hd{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:.85rem;padding-bottom:.75rem;
+  border-bottom:1px solid var(--border);
+}
+.card-hd h2{font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.45rem}
+.tag{font-size:.7rem;color:var(--muted);font-family:var(--mono)}
+
+/* ── Camera card ── */
+#cam-card{grid-column:1;grid-row:1/3}
+.vidwrap{
+  position:relative;width:100%;background:#000;
+  border-radius:10px;overflow:hidden;aspect-ratio:16/9;
+  border:1px solid rgba(255,255,255,.08);
+}
+.vidwrap img{width:100%;height:100%;object-fit:cover;display:block}
+.live-badge{
+  position:absolute;top:10px;left:10px;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+  padding:3px 9px;border-radius:6px;
+  font-size:.7rem;font-weight:600;color:var(--red);
+  display:flex;align-items:center;gap:5px;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+.ai-badge{
+  position:absolute;bottom:10px;right:10px;
+  background:rgba(0,0,0,.7);padding:4px 10px;border-radius:7px;
+  font-size:.7rem;font-family:var(--mono);
+}
+
+/* ── Stat bar ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-top:.9rem}
+.stat{background:rgba(255,255,255,.03);border:1px solid var(--border);
+      padding:.75rem;border-radius:10px;text-align:center}
+.stat-v{font-size:1.35rem;font-weight:800;color:var(--blue)}
+.stat-l{font-size:.68rem;color:var(--muted);margin-top:2px}
+
+/* ── Right column ── */
+#rfid-card{grid-column:2;grid-row:1}
+#weapon-card{grid-column:2;grid-row:2}
+
+/* ── Scrollable log list ── */
+.log-list{display:flex;flex-direction:column;gap:.6rem;overflow-y:auto;max-height:300px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.log-item{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);
+  padding:.7rem .9rem;border-radius:8px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  transition:background .2s,border-color .2s;
+}
+.log-item:hover{background:rgba(255,255,255,.06);border-color:rgba(59,130,246,.3)}
+.log-tag{font-weight:700;color:var(--cyan);font-family:var(--mono);font-size:.85rem}
+.log-sub{font-size:.7rem;color:var(--muted);margin-top:2px}
+.log-time{font-size:.72rem;color:var(--muted);white-space:nowrap;margin-left:.5rem}
+.log-item.weapon{border-color:rgba(239,68,68,.35)!important;background:rgba(239,68,68,.06)!important}
+.log-item.weapon .log-tag{color:var(--red)}
+.refresh-btn{font-size:.72rem;color:var(--green);cursor:pointer;user-select:none}
+.refresh-btn:hover{text-decoration:underline}
+.empty{font-size:.8rem;color:var(--muted);text-align:center;padding:1.5rem 0}
+
+/* ── Footer ── */
+footer{
+  padding:.75rem 1.75rem;text-align:center;
+  font-size:.73rem;color:var(--muted);
+  border-top:1px solid var(--border);
+  background:rgba(8,12,20,.8);
+}
+
+@media(max-width:860px){
+  main{grid-template-columns:1fr}
+  #cam-card{grid-column:1;grid-row:1}
+  #rfid-card{grid-column:1;grid-row:2}
+  #weapon-card{grid-column:1;grid-row:3}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">C</div>
+    <div class="logo-text">
+      <h1>COREC — Crime Abstractor</h1>
+      <p>AI Corridor Safety &amp; RFID Entry Management System</p>
+    </div>
+  </div>
+  <div class="sys-status"><span class="dot"></span>SYSTEM ONLINE</div>
+</header>
+
+<!-- ── Threat Banner ────────────────────────────────────────────────────── -->
+<div id="threat-banner">
+  <span id="thr-msg">🛡️ System Ready — Monitoring Corridor</span>
+  <span id="thr-ts" style="font-size:.75rem;opacity:.75">--:--:--</span>
+</div>
+
+<main>
+
+  <!-- ── Camera + Stats ─────────────────────────────────────────────────── -->
+  <section class="card" id="cam-card">
+    <div class="card-hd">
+      <h2>🎥 Live Corridor Stream</h2>
+      <span class="tag">COFE CF-W-PTC01-A &nbsp;|&nbsp; 192.168.50.86:554</span>
+    </div>
+
+    <div class="vidwrap">
+      <img id="cam-img" src="/video_feed" alt="Camera Stream">
+      <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+      <div class="ai-badge" id="ai-badge">AI: —</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-v" id="stat-rfid">0</div>
+        <div class="stat-l">RFID Entries</div>
+      </div>
+      <div class="stat">
+        <div class="stat-v" id="stat-thr" style="color:var(--green)">CLEAR</div>
+        <div class="stat-l">Threat Level</div>
+      </div>
+      <div class="stat">
+        <div class="stat-v" id="stat-wpn" style="color:var(--red)">0</div>
+        <div class="stat-l">Weapon Alerts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RFID Entry Log ─────────────────────────────────────────────────── -->
+  <section class="card" id="rfid-card">
+    <div class="card-hd">
+      <h2>💳 RFID Entry Log</h2>
+      <span class="refresh-btn" onclick="fetchRFID()">⟳ Refresh</span>
+    </div>
+    <div class="log-list" id="rfid-list">
+      <div class="empty">Waiting for card scans…</div>
+    </div>
+  </section>
+
+  <!-- ── Weapon Alert Log ───────────────────────────────────────────────── -->
+  <section class="card" id="weapon-card">
+    <div class="card-hd">
+      <h2>🚨 Weapon Alert Log</h2>
+      <span class="refresh-btn" onclick="fetchWeaponLogs()">⟳ Refresh</span>
+    </div>
+    <div class="log-list" id="weapon-list">
+      <div class="empty">No weapon alerts recorded.</div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Corec Crime Detection Framework &nbsp;|&nbsp; Dept. of AI &amp; DS — Sri Eshwar College of Engineering</footer>
+
+<script>
+// ── Threat status polling ────────────────────────────────────────────────────
+async function fetchThreat(){
+  try{
+    const r = await fetch('/api/threat_status');
+    const d = await r.json();
+    if(d.status!=='success') return;
+    const t = d.threat;
+    const banner = document.getElementById('threat-banner');
+    const msg    = document.getElementById('thr-msg');
+    const ts     = document.getElementById('thr-ts');
+    const thrStat= document.getElementById('stat-thr');
+    const aiBadge= document.getElementById('ai-badge');
+
+    ts.innerText = t.timestamp||'';
+    aiBadge.innerText = `AI: ${t.label||'—'} ${t.confidence?(Math.round(t.confidence*100)+'%'):''}`;
+    thrStat.innerText = t.level||'CLEAR';
+
+    if(t.level==='ALERT'){
+      banner.className='alert';
+      msg.innerText=`🚨 WEAPON DETECTED — ${t.message}`;
+      thrStat.style.color='var(--red)';
+    } else if(t.level==='WARNING'){
+      banner.className='warn';
+      msg.innerText=`⚠️  ${t.message}`;
+      thrStat.style.color='var(--amber)';
+    } else {
+      banner.className='';
+      msg.innerText=`🛡️ ${t.message||'Corridor Clear — No Threat'}`;
+      thrStat.style.color='var(--green)';
+    }
+  }catch(e){}
+}
+
+// ── RFID log polling ─────────────────────────────────────────────────────────
+async function fetchRFID(){
+  try{
+    const r = await fetch('/api/rfid_logs');
+    const d = await r.json();
+    if(d.status!=='success') return;
+    const list = document.getElementById('rfid-list');
+    document.getElementById('stat-rfid').innerText = d.count;
+    if(!d.logs.length){list.innerHTML='<div class="empty">No scans yet</div>';return;}
+    list.innerHTML = d.logs.map(l=>`
+      <div class="log-item">
+        <div>
+          <div class="log-tag">Tag: ${l.rfid_tag}</div>
+          <div class="log-sub">Node: ${l.node_id||'corridor-1'}${l.tag_text?' | '+l.tag_text:''}</div>
+        </div>
+        <div class="log-time">${l.received_at||l.timestamp||''}</div>
+      </div>`).join('');
+  }catch(e){}
+}
+
+// ── Weapon log polling ───────────────────────────────────────────────────────
+async function fetchWeaponLogs(){
+  try{
+    const r = await fetch('/api/weapon_logs');
+    const d = await r.json();
+    if(d.status!=='success') return;
+    const list = document.getElementById('weapon-list');
+    document.getElementById('stat-wpn').innerText = d.count;
+    if(!d.logs.length){list.innerHTML='<div class="empty">No weapon alerts recorded.</div>';return;}
+    list.innerHTML = d.logs.map(l=>`
+      <div class="log-item weapon">
+        <div>
+          <div class="log-tag">🔫 ${l.label||'Weapon'} — ${l.confidence?(Math.round(l.confidence*100)+'%'):'?'}</div>
+          <div class="log-sub">${l.message||''}</div>
+        </div>
+        <div class="log-time">${l.timestamp||''}</div>
+      </div>`).join('');
+  }catch(e){}
+}
+
+// ── Auto-refresh timers ──────────────────────────────────────────────────────
+setInterval(fetchThreat,      1500);
+setInterval(fetchRFID,        2500);
+setInterval(fetchWeaponLogs,  3000);
+
+fetchThreat();
+fetchRFID();
+fetchWeaponLogs();
+</script>
+</body>
+</html>
